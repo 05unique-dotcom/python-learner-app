@@ -3,20 +3,25 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Python Learner API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: lessons
+    description: Python lessons
+  - name: challenges
+    description: Coding challenges
+  - name: progress
+    description: User progress tracking
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +29,117 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /lessons:
+    get:
+      operationId: listLessons
+      tags: [lessons]
+      summary: List all lessons
+      responses:
+        "200":
+          description: List of lessons
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Lesson"
+
+  /lessons/{id}:
+    get:
+      operationId: getLesson
+      tags: [lessons]
+      summary: Get lesson by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Lesson detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LessonDetail"
+        "404":
+          description: Not found
+
+  /lessons/{id}/challenges:
+    get:
+      operationId: getLessonChallenges
+      tags: [challenges]
+      summary: Get challenges for a lesson
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of challenges
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Challenge"
+
+  /challenges/{id}/attempt:
+    post:
+      operationId: submitAttempt
+      tags: [challenges]
+      summary: Submit an answer attempt for a challenge
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AttemptInput"
+      responses:
+        "200":
+          description: Attempt result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AttemptResult"
+
+  /progress/summary:
+    get:
+      operationId: getProgressSummary
+      tags: [progress]
+      summary: Get overall learning progress summary
+      responses:
+        "200":
+          description: Progress summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProgressSummary"
+
+  /progress/lessons:
+    get:
+      operationId: getLessonProgress
+      tags: [progress]
+      summary: Get per-lesson progress
+      responses:
+        "200":
+          description: Per-lesson progress list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LessonProgress"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +150,110 @@ components:
       required:
         - status
 
+    Lesson:
+      type: object
+      required: [id, title, description, order, difficulty, totalChallenges]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        order:
+          type: integer
+        difficulty:
+          type: string
+          enum: [beginner, intermediate, advanced]
+        totalChallenges:
+          type: integer
+
+    LessonDetail:
+      type: object
+      required: [id, title, description, order, difficulty, content, totalChallenges]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        order:
+          type: integer
+        difficulty:
+          type: string
+          enum: [beginner, intermediate, advanced]
+        content:
+          type: string
+        totalChallenges:
+          type: integer
+
+    Challenge:
+      type: object
+      required: [id, lessonId, question, type, options, explanation]
+      properties:
+        id:
+          type: integer
+        lessonId:
+          type: integer
+        question:
+          type: string
+        type:
+          type: string
+          enum: [multiple_choice, fill_blank]
+        options:
+          type: array
+          items:
+            type: string
+        explanation:
+          type: string
+
+    AttemptInput:
+      type: object
+      required: [answer]
+      properties:
+        answer:
+          type: string
+
+    AttemptResult:
+      type: object
+      required: [correct, explanation, correctAnswer]
+      properties:
+        correct:
+          type: boolean
+        explanation:
+          type: string
+        correctAnswer:
+          type: string
+
+    ProgressSummary:
+      type: object
+      required: [totalLessons, completedLessons, totalChallenges, completedChallenges, correctAttempts, totalAttempts]
+      properties:
+        totalLessons:
+          type: integer
+        completedLessons:
+          type: integer
+        totalChallenges:
+          type: integer
+        completedChallenges:
+          type: integer
+        correctAttempts:
+          type: integer
+        totalAttempts:
+          type: integer
+
+    LessonProgress:
+      type: object
+      required: [lessonId, completed, correctChallenges, totalChallenges, attemptCount]
+      properties:
+        lessonId:
+          type: integer
+        completed:
+          type: boolean
+        correctChallenges:
+          type: integer
+        totalChallenges:
+          type: integer
+        attemptCount:
+          type: integer
