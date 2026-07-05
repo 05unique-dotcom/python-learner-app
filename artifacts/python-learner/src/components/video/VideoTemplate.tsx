@@ -19,32 +19,36 @@ const SCENE_DURATIONS = {
 };
 
 const bgColors = [
-  '#6d28d9', // intro
-  '#f8fafc', // lessons
-  '#4c1d95', // quizzes
-  '#f1f5f9', // badges
-  '#5b21b6', // certificate
-  '#ffffff', // streak
-  '#6d28d9', // closing
+  '#6d28d9',
+  '#f8fafc',
+  '#4c1d95',
+  '#f1f5f9',
+  '#5b21b6',
+  '#ffffff',
+  '#6d28d9',
 ];
 
-export default function VideoTemplate() {
-  const { currentScene } = useVideoPlayer({ durations: SCENE_DURATIONS });
+interface VideoTemplateProps {
+  paused?: boolean;
+  speed?: number;
+}
+
+export default function VideoTemplate({ paused = false, speed = 1 }: VideoTemplateProps) {
+  const { currentScene } = useVideoPlayer({ durations: SCENE_DURATIONS, paused, speed });
 
   return (
     <div className="relative w-full h-screen overflow-hidden bg-white text-slate-900 font-sans">
-      {/* Persistent Background Layer */}
-      <motion.div 
+      <motion.div
         className="absolute inset-0"
         animate={{ backgroundColor: bgColors[currentScene] }}
         transition={{ duration: 1.2, ease: "easeInOut" }}
       >
         <motion.div className="absolute w-[80vw] h-[80vw] rounded-full opacity-20 blur-3xl"
           style={{ background: 'radial-gradient(circle, #a78bfa, transparent)' }}
-          animate={{ 
-            x: ['-20%', '80%', '20%'], 
-            y: ['20%', '60%', '10%'], 
-            scale: [1, 1.4, 0.9] 
+          animate={{
+            x: ['-20%', '80%', '20%'],
+            y: ['20%', '60%', '10%'],
+            scale: [1, 1.4, 0.9]
           }}
           transition={{ duration: 20, repeat: Infinity, ease: 'easeInOut' }} />
         <motion.div className="absolute w-[60vw] h-[60vw] rounded-full opacity-15 blur-3xl right-0 bottom-0"
@@ -53,7 +57,6 @@ export default function VideoTemplate() {
           transition={{ duration: 25, repeat: Infinity, ease: 'easeInOut' }} />
       </motion.div>
 
-      {/* Foreground Content inside AnimatePresence */}
       <AnimatePresence mode="sync">
         {currentScene === 0 && <Scene1 key="intro" />}
         {currentScene === 1 && <Scene2 key="lessons" />}

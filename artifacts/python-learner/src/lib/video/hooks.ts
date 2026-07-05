@@ -7,25 +7,32 @@ declare global {
   }
 }
 
-export function useVideoPlayer({ durations }: { durations: Record<string, number> }) {
+export function useVideoPlayer({
+  durations,
+  paused = false,
+  speed = 1,
+}: {
+  durations: Record<string, number>;
+  paused?: boolean;
+  speed?: number;
+}) {
   const [currentScene, setCurrentScene] = useState(0);
-  // We useRef to keep a stable reference to the keys to avoid re-running effects
-  // if the durations object reference changes
   const keysRef = useRef(Object.keys(durations));
   const numScenes = keysRef.current.length;
   const hasRecordedRef = useRef(false);
 
   useEffect(() => {
-    // Notify external recorders that playback has started
     window.startRecording?.();
   }, []);
 
   useEffect(() => {
+    if (paused) return;
+
     const currentKey = keysRef.current[currentScene];
-    const duration = durations[currentKey] || 3000;
+    const baseDuration = durations[currentKey] || 3000;
+    const duration = baseDuration / speed;
 
     const timer = setTimeout(() => {
-      // If we just finished the last scene
       if (currentScene === numScenes - 1) {
         if (!hasRecordedRef.current) {
           window.stopRecording?.();
@@ -36,7 +43,7 @@ export function useVideoPlayer({ durations }: { durations: Record<string, number
     }, duration);
 
     return () => clearTimeout(timer);
-  }, [currentScene, durations, numScenes]);
+  }, [currentScene, durations, numScenes, paused, speed]);
 
-  return { currentScene };
+  return { currentScene, setCurrentScene };
 }
