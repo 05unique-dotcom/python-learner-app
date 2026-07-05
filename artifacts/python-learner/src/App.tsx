@@ -8,6 +8,8 @@ import { Home } from "@/pages/Home";
 import { Lessons } from "@/pages/Lessons";
 import { LessonDetail } from "@/pages/LessonDetail";
 import { ChallengeMode } from "@/pages/ChallengeMode";
+import { Badges } from "@/pages/Badges";
+import { Certificate } from "@/pages/Certificate";
 
 const queryClient = new QueryClient();
 
@@ -21,6 +23,8 @@ function Router() {
             <Route path="/" component={Home} />
             <Route path="/lessons" component={Lessons} />
             <Route path="/lessons/:id" component={LessonDetail} />
+            <Route path="/badges" component={Badges} />
+            <Route path="/certificate" component={Certificate} />
             <Route component={NotFound} />
           </Switch>
         </Shell>

@@ -3,6 +3,8 @@ import healthRouter from "./health";
 import lessonsRouter from "./lessons";
 import challengesRouter from "./challenges";
 import progressRouter from "./progress";
+import badgesRouter from "./badges";
+import certificateRouter from "./certificate";
 
 const router: IRouter = Router();
 
@@ -10,5 +12,7 @@ router.use(healthRouter);
 router.use(lessonsRouter);
 router.use(challengesRouter);
 router.use(progressRouter);
+router.use(badgesRouter);
+router.use(certificateRouter);
 
 export default router;

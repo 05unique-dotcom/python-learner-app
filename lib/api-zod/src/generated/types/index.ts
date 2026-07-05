@@ -8,6 +8,8 @@
 
 export * from './attemptInput';
 export * from './attemptResult';
+export * from './badge';
+export * from './certificate';
 export * from './challenge';
 export * from './challengeType';
 export * from './healthStatus';

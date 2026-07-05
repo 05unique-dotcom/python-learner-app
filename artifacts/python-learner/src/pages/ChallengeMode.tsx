@@ -1,15 +1,25 @@
 import { useParams, useLocation } from "wouter";
 import { useState } from "react";
-import { useGetLessonChallenges, useSubmitAttempt, getGetLessonChallengesQueryKey, getGetProgressSummaryQueryKey, getGetLessonProgressQueryKey } from "@workspace/api-client-react";
+import { useGetLessonChallenges, useSubmitAttempt, getGetLessonChallengesQueryKey, getGetProgressSummaryQueryKey, getGetLessonProgressQueryKey, useGetBadges, getGetBadgesQueryKey, useGetProgressSummary } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { X, CheckCircle2, XCircle, ArrowRight } from "lucide-react";
+import { X, CheckCircle2, XCircle, ArrowRight, Award, Trophy, Star, Zap, BookCheck, TrendingUp, Brain, ShieldCheck } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+
+const iconMap: Record<string, any> = {
+  "zap": Zap,
+  "book-check": BookCheck,
+  "star": Star,
+  "trending-up": TrendingUp,
+  "trophy": Trophy,
+  "brain": Brain,
+  "shield-check": ShieldCheck,
+};
 
 export function ChallengeMode() {
   const params = useParams();
@@ -20,10 +30,14 @@ export function ChallengeMode() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answer, setAnswer] = useState("");
   const [result, setResult] = useState<{ correct: boolean; explanation: string; correctAnswer: string } | null>(null);
+  const [sessionCorrectCount, setSessionCorrectCount] = useState(0);
 
   const { data: challenges, isLoading } = useGetLessonChallenges(lessonId, {
     query: { enabled: !!lessonId, queryKey: getGetLessonChallengesQueryKey(lessonId) }
   });
+
+  const { data: badges } = useGetBadges({ query: { queryKey: getGetBadgesQueryKey() } });
+  const { data: summary } = useGetProgressSummary();
 
   const submitAttempt = useSubmitAttempt();
 
@@ -39,14 +53,82 @@ export function ChallengeMode() {
   }
 
   if (currentIndex >= challenges.length) {
+    const accuracy = (sessionCorrectCount / challenges.length) * 100;
+    
+    let resultColor = "text-primary";
+    let resultBg = "bg-primary/20";
+    let resultText = "Keep practicing!";
+    
+    if (accuracy === 100) {
+      resultColor = "text-yellow-500";
+      resultBg = "bg-yellow-500/20";
+      resultText = "Perfect!";
+    } else if (accuracy >= 75) {
+      resultColor = "text-green-500";
+      resultBg = "bg-green-500/20";
+      resultText = "Great job!";
+    } else if (accuracy >= 50) {
+      resultColor = "text-blue-500";
+      resultBg = "bg-blue-500/20";
+      resultText = "Good effort!";
+    }
+
+    const earnedBadges = badges?.filter(b => b.earned) || [];
+    const allLessonsComplete = summary?.completedLessons === summary?.totalLessons;
+
     return (
-      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
-        <div className="w-16 h-16 bg-green-500/20 text-green-500 rounded-full flex items-center justify-center mb-6">
-          <CheckCircle2 className="w-8 h-8" />
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4 relative overflow-hidden">
+        {accuracy === 100 && (
+          <div className="absolute inset-0 pointer-events-none z-0">
+             {/* Simple CSS Confetti */}
+             {Array.from({ length: 30 }).map((_, i) => (
+                <div key={i} className="confetti-piece" style={{ 
+                  left: `${Math.random() * 100}%`,
+                  animationDelay: `${Math.random() * 3}s`,
+                  backgroundColor: ['#eab308', '#3b82f6', '#ef4444', '#22c55e', '#a855f7'][Math.floor(Math.random() * 5)]
+                }}></div>
+             ))}
+          </div>
+        )}
+
+        <div className="z-10 bg-card border rounded-2xl p-8 md:p-12 shadow-xl max-w-2xl w-full text-center animate-in fade-in zoom-in slide-in-from-bottom-8 duration-700">
+          <div className={`w-24 h-24 mx-auto rounded-full flex items-center justify-center mb-6 border-4 ${resultColor.replace('text-', 'border-')} ${resultBg}`}>
+            <span className={`text-3xl font-bold ${resultColor}`}>{sessionCorrectCount}/{challenges.length}</span>
+          </div>
+          
+          <h1 className="text-4xl font-bold mb-2 tracking-tight">{resultText}</h1>
+          <p className="text-muted-foreground text-lg mb-8 max-w-md mx-auto">
+            You completed {challenges.length} challenge{challenges.length !== 1 && 's'} in this session.
+          </p>
+
+          {earnedBadges.length > 0 && (
+            <div className="mb-10 p-6 bg-muted/50 rounded-xl">
+              <h3 className="text-sm font-bold text-muted-foreground uppercase tracking-wider mb-4">Badges You've Earned</h3>
+              <div className="flex flex-wrap justify-center gap-4">
+                {earnedBadges.map(badge => {
+                  const Icon = iconMap[badge.icon] || Star;
+                  return (
+                    <div key={badge.id} className="flex flex-col items-center p-3 bg-card border border-primary/20 rounded-lg shadow-sm w-24">
+                      <Icon className="w-8 h-8 text-primary mb-2" />
+                      <span className="text-xs font-semibold text-center leading-tight line-clamp-2">{badge.name}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button size="lg" variant="outline" onClick={() => setLocation("/lessons")} className="text-lg px-8">
+              Back to Lessons
+            </Button>
+            {allLessonsComplete && (
+              <Button size="lg" onClick={() => setLocation("/certificate")} className="text-lg px-8 gap-2">
+                <Award className="w-5 h-5" /> View Certificate
+              </Button>
+            )}
+          </div>
         </div>
-        <h1 className="text-3xl font-bold mb-2">Lesson Complete!</h1>
-        <p className="text-muted-foreground mb-8 text-center max-w-md">You've finished all challenges for this lesson. Keep up the great momentum.</p>
-        <Button size="lg" onClick={() => setLocation("/lessons")}>Return to Curriculum</Button>
       </div>
     );
   }
@@ -62,8 +144,12 @@ export function ChallengeMode() {
       {
         onSuccess: (data) => {
           setResult(data);
+          if (data.correct) {
+            setSessionCorrectCount(prev => prev + 1);
+          }
           queryClient.invalidateQueries({ queryKey: getGetProgressSummaryQueryKey() });
           queryClient.invalidateQueries({ queryKey: getGetLessonProgressQueryKey() });
+          queryClient.invalidateQueries({ queryKey: getGetBadgesQueryKey() });
         }
       }
     );

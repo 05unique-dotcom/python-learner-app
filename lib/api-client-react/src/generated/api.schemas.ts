@@ -90,3 +90,23 @@ export interface LessonProgress {
   attemptCount: number;
 }
 
+export interface Badge {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  earned: boolean;
+  earnedAt?: string | null;
+}
+
+export interface Certificate {
+  earned: boolean;
+  completedAt?: string | null;
+  totalLessons: number;
+  completedLessons: number;
+  totalChallenges: number;
+  completedChallenges: number;
+  accuracy: number;
+  badgesEarned: number;
+}
+

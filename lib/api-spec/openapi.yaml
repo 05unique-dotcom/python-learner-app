@@ -16,6 +16,10 @@ tags:
     description: Coding challenges
   - name: progress
     description: User progress tracking
+  - name: badges
+    description: Achievement badges
+  - name: certificate
+    description: Completion certificate
 paths:
   /healthz:
     get:
@@ -140,6 +144,34 @@ paths:
                 items:
                   $ref: "#/components/schemas/LessonProgress"
 
+  /badges:
+    get:
+      operationId: getBadges
+      tags: [badges]
+      summary: Get all badges with earned status
+      responses:
+        "200":
+          description: List of badges
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Badge"
+
+  /certificate:
+    get:
+      operationId: getCertificate
+      tags: [certificate]
+      summary: Get completion certificate data
+      responses:
+        "200":
+          description: Certificate data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Certificate"
+
 components:
   schemas:
     HealthStatus:
@@ -256,4 +288,44 @@ components:
         totalChallenges:
           type: integer
         attemptCount:
+          type: integer
+
+    Badge:
+      type: object
+      required: [id, name, description, icon, earned]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        icon:
+          type: string
+        earned:
+          type: boolean
+        earnedAt:
+          type: string
+          nullable: true
+
+    Certificate:
+      type: object
+      required: [earned, totalLessons, completedLessons, totalChallenges, completedChallenges, accuracy, badgesEarned]
+      properties:
+        earned:
+          type: boolean
+        completedAt:
+          type: string
+          nullable: true
+        totalLessons:
+          type: integer
+        completedLessons:
+          type: integer
+        totalChallenges:
+          type: integer
+        completedChallenges:
+          type: integer
+        accuracy:
+          type: integer
+        badgesEarned:
           type: integer

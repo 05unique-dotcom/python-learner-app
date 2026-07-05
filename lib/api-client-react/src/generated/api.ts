@@ -22,6 +22,8 @@ import type {
 import type {
   AttemptInput,
   AttemptResult,
+  Badge,
+  Certificate,
   Challenge,
   HealthStatus,
   Lesson,
@@ -564,6 +566,160 @@ export function useGetLessonProgress<TData = Awaited<ReturnType<typeof getLesson
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetLessonProgressQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetBadgesUrl = () => {
+
+
+
+
+  return `/api/badges`
+}
+
+/**
+ * @summary Get all badges with earned status
+ */
+export const getBadges = async ( options?: RequestInit): Promise<Badge[]> => {
+
+  return customFetch<Badge[]>(getGetBadgesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetBadgesQueryKey = () => {
+    return [
+    `/api/badges`
+    ] as const;
+    }
+
+
+export const getGetBadgesQueryOptions = <TData = Awaited<ReturnType<typeof getBadges>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getBadges>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetBadgesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getBadges>>> = ({ signal }) => getBadges({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getBadges>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetBadgesQueryResult = NonNullable<Awaited<ReturnType<typeof getBadges>>>
+export type GetBadgesQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get all badges with earned status
+ */
+
+export function useGetBadges<TData = Awaited<ReturnType<typeof getBadges>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getBadges>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetBadgesQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetCertificateUrl = () => {
+
+
+
+
+  return `/api/certificate`
+}
+
+/**
+ * @summary Get completion certificate data
+ */
+export const getCertificate = async ( options?: RequestInit): Promise<Certificate> => {
+
+  return customFetch<Certificate>(getGetCertificateUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetCertificateQueryKey = () => {
+    return [
+    `/api/certificate`
+    ] as const;
+    }
+
+
+export const getGetCertificateQueryOptions = <TData = Awaited<ReturnType<typeof getCertificate>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCertificate>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCertificateQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCertificate>>> = ({ signal }) => getCertificate({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCertificate>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetCertificateQueryResult = NonNullable<Awaited<ReturnType<typeof getCertificate>>>
+export type GetCertificateQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get completion certificate data
+ */
+
+export function useGetCertificate<TData = Awaited<ReturnType<typeof getCertificate>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCertificate>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetCertificateQueryOptions(options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

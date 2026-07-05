@@ -110,3 +110,32 @@ export const GetLessonProgressResponseItem = zod.object({
 export const GetLessonProgressResponse = zod.array(GetLessonProgressResponseItem)
 
 
+/**
+ * @summary Get all badges with earned status
+ */
+export const GetBadgesResponseItem = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "description": zod.string(),
+  "icon": zod.string(),
+  "earned": zod.boolean(),
+  "earnedAt": zod.string().nullish()
+})
+export const GetBadgesResponse = zod.array(GetBadgesResponseItem)
+
+
+/**
+ * @summary Get completion certificate data
+ */
+export const GetCertificateResponse = zod.object({
+  "earned": zod.boolean(),
+  "completedAt": zod.string().nullish(),
+  "totalLessons": zod.number(),
+  "completedLessons": zod.number(),
+  "totalChallenges": zod.number(),
+  "completedChallenges": zod.number(),
+  "accuracy": zod.number(),
+  "badgesEarned": zod.number()
+})
+
+
