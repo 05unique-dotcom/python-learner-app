@@ -1,10 +1,10 @@
 import { useParams, useLocation } from "wouter";
 import { useState } from "react";
-import { useGetLessonChallenges, useSubmitAttempt, getGetLessonChallengesQueryKey, getGetProgressSummaryQueryKey, getGetLessonProgressQueryKey, useGetBadges, getGetBadgesQueryKey, useGetProgressSummary } from "@workspace/api-client-react";
+import { useGetLessonChallenges, useSubmitAttempt, getGetLessonChallengesQueryKey, getGetProgressSummaryQueryKey, getGetLessonProgressQueryKey, useGetBadges, getGetBadgesQueryKey, useGetProgressSummary, useGetStreak, getGetStreakQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { X, CheckCircle2, XCircle, ArrowRight, Award, Trophy, Star, Zap, BookCheck, TrendingUp, Brain, ShieldCheck } from "lucide-react";
+import { X, CheckCircle2, XCircle, ArrowRight, Award, Trophy, Star, Zap, BookCheck, TrendingUp, Brain, ShieldCheck, Flame } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -38,6 +38,7 @@ export function ChallengeMode() {
 
   const { data: badges } = useGetBadges({ query: { queryKey: getGetBadgesQueryKey() } });
   const { data: summary } = useGetProgressSummary();
+  const { data: streak } = useGetStreak({ query: { queryKey: getGetStreakQueryKey() } });
 
   const submitAttempt = useSubmitAttempt();
 
@@ -97,9 +98,16 @@ export function ChallengeMode() {
           </div>
           
           <h1 className="text-4xl font-bold mb-2 tracking-tight">{resultText}</h1>
-          <p className="text-muted-foreground text-lg mb-8 max-w-md mx-auto">
+          <p className="text-muted-foreground text-lg mb-4 max-w-md mx-auto">
             You completed {challenges.length} challenge{challenges.length !== 1 && 's'} in this session.
           </p>
+
+          <div className={`mb-8 p-4 rounded-xl flex items-center justify-center gap-3 font-medium ${streak?.todayCompleted ? 'bg-orange-500/10 text-orange-600 dark:text-orange-400' : 'bg-muted text-muted-foreground'}`}>
+            <Flame className="w-5 h-5" />
+            {streak?.todayCompleted 
+              ? `Streak extended! ${streak.currentStreak} days in a row` 
+              : `Complete a lesson to start your streak!`}
+          </div>
 
           {earnedBadges.length > 0 && (
             <div className="mb-10 p-6 bg-muted/50 rounded-xl">
@@ -150,6 +158,7 @@ export function ChallengeMode() {
           queryClient.invalidateQueries({ queryKey: getGetProgressSummaryQueryKey() });
           queryClient.invalidateQueries({ queryKey: getGetLessonProgressQueryKey() });
           queryClient.invalidateQueries({ queryKey: getGetBadgesQueryKey() });
+          queryClient.invalidateQueries({ queryKey: getGetStreakQueryKey() });
         }
       }
     );

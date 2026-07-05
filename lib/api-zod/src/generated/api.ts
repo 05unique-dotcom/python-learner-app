@@ -139,3 +139,20 @@ export const GetCertificateResponse = zod.object({
 })
 
 
+/**
+ * @summary Get current learning streak and activity history
+ */
+export const GetStreakResponse = zod.object({
+  "currentStreak": zod.number(),
+  "longestStreak": zod.number(),
+  "todayCompleted": zod.boolean(),
+  "lastActivityDate": zod.string().nullish(),
+  "totalActiveDays": zod.number(),
+  "weekActivity": zod.array(zod.boolean()),
+  "monthActivity": zod.array(zod.object({
+  "date": zod.string(),
+  "count": zod.number()
+}))
+})
+
+

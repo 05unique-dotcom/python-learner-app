@@ -1,7 +1,7 @@
 import { useGetBadges, getGetBadgesQueryKey, useGetProgressSummary } from "@workspace/api-client-react";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Zap, BookCheck, Star, TrendingUp, Trophy, Brain, ShieldCheck, Lock, LucideIcon } from "lucide-react";
+import { Zap, BookCheck, Star, TrendingUp, Trophy, Brain, ShieldCheck, Lock, LucideIcon, Flame } from "lucide-react";
 import { format } from "date-fns";
 
 const iconMap: Record<string, LucideIcon> = {
@@ -12,6 +12,7 @@ const iconMap: Record<string, LucideIcon> = {
   "trophy": Trophy,
   "brain": Brain,
   "shield-check": ShieldCheck,
+  "flame": Flame,
 };
 
 export function Badges() {

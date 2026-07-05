@@ -54,6 +54,18 @@ const BADGE_DEFS: BadgeDef[] = [
     description: "Answer 10 or more challenges correctly",
     icon: "shield-check",
   },
+  {
+    id: "streak_3",
+    name: "3-Day Streak",
+    description: "Practice Python 3 days in a row",
+    icon: "flame",
+  },
+  {
+    id: "streak_7",
+    name: "7-Day Streak",
+    description: "Practice Python 7 days in a row",
+    icon: "flame",
+  },
 ];
 
 async function computeEarnedBadges(): Promise<Map<string, string>> {
@@ -154,6 +166,28 @@ async function computeEarnedBadges(): Promise<Map<string, string>> {
   if (correctAttempts >= 10) {
     earned.set("challenger", now);
   }
+
+  // streak_3 / streak_7: compute longest streak from attempt dates
+  const dateRows = await db.execute<{ date: string }>(
+    sql`SELECT DISTINCT DATE(created_at AT TIME ZONE 'UTC')::text AS date FROM attempts ORDER BY date`
+  );
+  const sortedDates = dateRows.rows.map((r) => r.date);
+  let longestStreak = 0;
+  let runningStreak = 0;
+  let prevDate: Date | null = null;
+  for (const dateStr of sortedDates) {
+    const cur = new Date(dateStr + "T12:00:00Z");
+    if (prevDate) {
+      const diff = (cur.getTime() - prevDate.getTime()) / (1000 * 60 * 60 * 24);
+      runningStreak = Math.round(diff) === 1 ? runningStreak + 1 : 1;
+    } else {
+      runningStreak = 1;
+    }
+    if (runningStreak > longestStreak) longestStreak = runningStreak;
+    prevDate = cur;
+  }
+  if (longestStreak >= 3) earned.set("streak_3", now);
+  if (longestStreak >= 7) earned.set("streak_7", now);
 
   return earned;
 }

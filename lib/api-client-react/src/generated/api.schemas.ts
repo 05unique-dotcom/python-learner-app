@@ -110,3 +110,18 @@ export interface Certificate {
   badgesEarned: number;
 }
 
+export interface DayActivity {
+  date: string;
+  count: number;
+}
+
+export interface StreakData {
+  currentStreak: number;
+  longestStreak: number;
+  todayCompleted: boolean;
+  lastActivityDate?: string | null;
+  totalActiveDays: number;
+  weekActivity: boolean[];
+  monthActivity: DayActivity[];
+}
+
