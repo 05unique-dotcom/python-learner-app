@@ -28,41 +28,81 @@ export function Certificate() {
   }
 
   if (!cert.earned) {
+    const remaining = cert.totalLessons - cert.completedLessons;
+    const progressPct = (cert.completedLessons / Math.max(cert.totalLessons, 1)) * 100;
+
     return (
-      <div className="max-w-3xl mx-auto animate-in fade-in duration-500 space-y-8">
+      <div className="max-w-3xl mx-auto animate-in fade-in duration-500 space-y-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Your Certificate</h1>
-          <p className="text-muted-foreground mt-2">Complete all lessons to unlock your certificate of completion.</p>
+          <p className="text-muted-foreground mt-2">Saare lessons complete karo apna certificate unlock karne ke liye.</p>
         </div>
 
+        {/* Progress bar */}
         <div className="bg-card border rounded-xl p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-3">
             <h2 className="font-semibold flex items-center gap-2">
               <BookOpen className="w-5 h-5 text-primary" />
-              Progress towards certificate
+              Certificate ki progress
             </h2>
-            <span className="text-sm font-medium">{cert.completedLessons} / {cert.totalLessons} Lessons</span>
+            <span className="text-sm font-medium text-muted-foreground">
+              {cert.completedLessons} / {cert.totalLessons} Lessons
+            </span>
           </div>
-          <Progress value={(cert.completedLessons / Math.max(cert.totalLessons, 1)) * 100} className="h-3" />
+          <Progress value={progressPct} className="h-3 mb-2" />
+          <p className="text-sm text-muted-foreground">
+            {remaining === 0
+              ? "Sab lessons complete! Certificate unlock ho raha hai..."
+              : `${remaining} lesson${remaining > 1 ? "s" : ""} aur baaki hain`}
+          </p>
         </div>
 
-        <div className="relative border-2 border-dashed border-border rounded-2xl p-12 bg-muted/20 overflow-hidden flex flex-col items-center justify-center text-center min-h-[400px]">
-          <div className="absolute inset-0 bg-background/50 backdrop-blur-[2px] z-10"></div>
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center">
-            <div className="w-16 h-16 bg-background border rounded-full flex items-center justify-center mb-4 shadow-sm">
+        {/* Pre-fill name section */}
+        <div className="bg-card border rounded-xl p-6 shadow-sm">
+          <h2 className="font-semibold mb-1 flex items-center gap-2">
+            <Award className="w-5 h-5 text-primary" />
+            Apna naam likho
+          </h2>
+          <p className="text-sm text-muted-foreground mb-4">
+            Certificate earn karne ke baad yahi naam certificate pe dikhega.
+          </p>
+          <input
+            type="text"
+            value={name}
+            onChange={handleNameChange}
+            placeholder="Apna poora naam likho..."
+            className="w-full text-lg font-semibold border-2 border-primary/20 rounded-lg px-4 py-3 focus:border-primary/60 focus:outline-none transition-colors bg-background"
+          />
+          {name && (
+            <p className="text-sm text-green-600 mt-2 flex items-center gap-1">
+              ✓ Naam save ho gaya — certificate milne par dikhega
+            </p>
+          )}
+        </div>
+
+        {/* Locked certificate preview */}
+        <div className="relative border-2 border-dashed border-border rounded-2xl overflow-hidden bg-muted/10">
+          {/* Blur overlay */}
+          <div className="absolute inset-0 bg-background/60 backdrop-blur-sm z-10 flex flex-col items-center justify-center gap-4 p-6 text-center">
+            <div className="w-16 h-16 bg-background border-2 border-border rounded-full flex items-center justify-center shadow-md">
               <Lock className="w-8 h-8 text-muted-foreground" />
             </div>
-            <h3 className="text-2xl font-bold text-foreground">Certificate Locked</h3>
-            <p className="text-muted-foreground mt-2 max-w-md">
-              You're making great progress! Complete the remaining {cert.totalLessons - cert.completedLessons} lessons to unlock your personalized certificate.
-            </p>
+            <div>
+              <h3 className="text-xl font-bold">Certificate Locked</h3>
+              <p className="text-muted-foreground text-sm mt-1 max-w-xs">
+                {remaining} aur lesson{remaining > 1 ? "s" : ""} complete karo certificate unlock karne ke liye
+              </p>
+            </div>
           </div>
-          
-          {/* Faded Certificate Preview */}
-          <div className="opacity-20 pointer-events-none w-full max-w-2xl border-4 border-double border-muted-foreground p-8">
+
+          {/* Faded preview */}
+          <div className="opacity-10 pointer-events-none p-10 flex flex-col items-center">
             <h1 className="text-4xl font-serif text-center mb-4">Certificate of Completion</h1>
-            <div className="h-px bg-muted-foreground w-1/2 mx-auto mb-8"></div>
-            <p className="text-center text-xl mb-12">Your Name Here</p>
+            <div className="h-px bg-foreground w-1/2 mx-auto mb-6" />
+            <p className="text-center text-2xl font-bold mb-2">{name || "Aapka Naam"}</p>
+            <p className="text-center text-base text-muted-foreground max-w-sm">
+              Has successfully completed the Python Learner curriculum.
+            </p>
           </div>
         </div>
       </div>
