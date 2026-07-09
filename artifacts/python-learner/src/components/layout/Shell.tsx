@@ -1,6 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { Terminal, BookOpen, Home, Award, GraduationCap, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ShareButton } from "./ShareButton";
 
 export function Shell({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
@@ -38,6 +39,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
             <span className="font-medium">Video</span>
           </Link>
         </nav>
+
+        <ShareButton />
       </aside>
 
       {/* Main Content */}
