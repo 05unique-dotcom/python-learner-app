@@ -1,10 +1,17 @@
 import { useState } from "react";
 import { Share2, Check, Copy } from "lucide-react";
 
+// Always share the real published domain — never window.location.origin.
+// Inside the Replit workspace (dev preview / iframe), the origin is a
+// *.replit.dev preview domain that only works for the person logged into
+// this workspace, not for outside viewers. The public production URL is
+// fixed once the app is first published, so it's safe to hardcode here.
+const PRODUCTION_URL = "https://python-learner--05unique7057.replit.app/";
+
 export function ShareButton() {
   const [copied, setCopied] = useState(false);
 
-  const getShareUrl = () => `${window.location.origin}/`;
+  const getShareUrl = () => PRODUCTION_URL;
 
   const handleShare = async () => {
     const url = getShareUrl();
