@@ -10,7 +10,7 @@ export function Certificate() {
   const [name, setName] = useState("");
 
   useEffect(() => {
-    const savedName = localStorage.getItem("pythonLearnerName");
+    const savedName =localStorage.getItem("pythonLearnerName");
     if (savedName) setName(savedName);
   }, []);
 
