@@ -50,7 +50,7 @@ export function Certificate() {
             </span>
           </div>
           <Progress value={progressPct} className="h-3 mb-2" />
-          <p classame="text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             {remaining === 0
               ? "Sab lessons complete! Certificate unlock ho raha hai..."
               : `${remaining} lesson${remaining > 1 ? "s" : ""} aur baaki hain`}

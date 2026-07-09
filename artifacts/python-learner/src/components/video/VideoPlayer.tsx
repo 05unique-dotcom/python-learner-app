@@ -16,7 +16,6 @@ const SCENE_LABELS = [
   "Closing",
 ];
 
-const TOTAL_SCENES = SCENE_LABELS.length;
 const SCENE_DURATIONS_MS = [5000, 6000, 6000, 6000, 6000, 6000, 6000];
 const TOTAL_DURATION_MS = SCENE_DURATIONS_MS.reduce((a, b) => a + b, 0);
 
@@ -27,7 +26,7 @@ export function VideoPlayer() {
   const [paused, setPaused] = useState(false);
   const [speed, setSpeed] = useState(1);
   const [volume, setVolumeState] = useState(0.7);
-  const [muted, setMuted] = useState(true); // start muted; user must opt in for audio
+  const [muted, setMuted] = useState(true);
   const [quality, setQuality] = useState("HD");
   const [showSpeedMenu, setShowSpeedMenu] = useState(false);
   const [showQualityMenu, setShowQualityMenu] = useState(false);
@@ -38,11 +37,10 @@ export function VideoPlayer() {
   const elapsedTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const audioStartedRef = useRef(false);
 
-  // Auto-hide controls after 3s of no movement
   const showControls = useCallback(() => {
     setControlsVisible(true);
     if (hideTimer.current) clearTimeout(hideTimer.current);
-    hideTimer.current = setTimeout(() => setControlsVisible(false), 3000);
+    hideTimer.current = setTimeout(() => setControlsVisible(false), 4000);
   }, []);
 
   useEffect(() => {
@@ -52,7 +50,6 @@ export function VideoPlayer() {
     };
   }, [showControls]);
 
-  // Elapsed time tracker for progress bar
   useEffect(() => {
     if (paused) {
       if (elapsedTimer.current) clearInterval(elapsedTimer.current);
@@ -66,13 +63,8 @@ export function VideoPlayer() {
     };
   }, [paused, speed]);
 
-  // Sync audio mute/unmute
   useEffect(() => {
     if (!muted) {
-      if (!audioStartedRef.current) {
-        startAudio();
-        audioStartedRef.current = true;
-      }
       setVolume(volume);
     } else {
       setVolume(0);
@@ -90,15 +82,39 @@ export function VideoPlayer() {
     showControls();
   };
 
+  // IMPORTANT: AudioContext must be created/resumed synchronously inside the
+  // click handler itself — browsers block audio started from useEffect/async
+  // callbacks that aren't directly triggered by a user gesture.
   const toggleMute = () => {
-    setMuted((m) => !m);
+    setMuted((prevMuted) => {
+      const nextMuted = !prevMuted;
+      if (!nextMuted) {
+        if (!audioStartedRef.current) {
+          startAudio();
+          audioStartedRef.current = true;
+        }
+        setVolume(volume);
+      } else {
+        setVolume(0);
+      }
+      return nextMuted;
+    });
     showControls();
   };
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const v = parseFloat(e.target.value);
     setVolumeState(v);
-    if (v > 0 && muted) setMuted(false);
+    if (v > 0 && muted) {
+      if (!audioStartedRef.current) {
+        startAudio();
+        audioStartedRef.current = true;
+      }
+      setMuted(false);
+      setVolume(v);
+    } else if (!muted) {
+      setVolume(v);
+    }
     showControls();
   };
 
@@ -116,7 +132,6 @@ export function VideoPlayer() {
 
   const progressPct = (elapsed / TOTAL_DURATION_MS) * 100;
 
-  // Compute which scene we're on from elapsed
   const computedScene = (() => {
     let acc = 0;
     for (let i = 0; i < SCENE_DURATIONS_MS.length; i++) {
@@ -138,20 +153,17 @@ export function VideoPlayer() {
 
   return (
     <div
-      className="relative w-full h-screen overflow-hidden bg-black"
+      className="relative w-full h-screen bg-black"
       onMouseMove={showControls}
       onTouchStart={showControls}
-      onClick={(e) => {
-        // Click on video area (not controls) to toggle pause
-        if ((e.target as HTMLElement).closest("[data-controls]")) return;
-        togglePause();
-      }}
       style={{ cursor: controlsVisible ? "default" : "none" }}
     >
-      {/* Video canvas — quality filter in SD mode */}
+      {/* Video canvas — its own overflow-hidden layer so dropdowns above the
+          control bar are never clipped by this container */}
       <div
-        className="w-full h-full"
+        className="absolute inset-0 overflow-hidden cursor-pointer"
         style={quality === "SD" ? { filter: "contrast(0.95) saturate(0.85)" } : {}}
+        onClick={togglePause}
       >
         <VideoTemplate paused={paused} speed={speed} />
       </div>
@@ -174,13 +186,12 @@ export function VideoPlayer() {
         )}
       </AnimatePresence>
 
-      {/* Control bar */}
+      {/* Control bar — sibling of the video layer, NOT clipped by overflow-hidden */}
       <AnimatePresence>
         {controlsVisible && (
           <motion.div
             key="controls"
-            data-controls
-            className="absolute bottom-0 left-0 right-0 px-4 pb-4 pt-8"
+            className="absolute bottom-0 left-0 right-0 px-4 pb-4 pt-8 z-20"
             style={{
               background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 60%, transparent 100%)",
             }}
@@ -188,14 +199,15 @@ export function VideoPlayer() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 12 }}
             transition={{ duration: 0.25 }}
+            onClick={(e) => e.stopPropagation()}
+            onMouseMove={(e) => e.stopPropagation()}
           >
             {/* Progress bar */}
-            <div className="relative w-full h-1 bg-white/20 rounded-full mb-3 group cursor-pointer">
+            <div className="relative w-full h-1 bg-white/20 rounded-full mb-3 cursor-pointer">
               <div
                 className="h-full bg-violet-400 rounded-full transition-all"
                 style={{ width: `${progressPct}%` }}
               />
-              {/* Scene markers */}
               {SCENE_DURATIONS_MS.slice(0, -1).reduce<{ pct: number; label: string }[]>((acc, dur, i) => {
                 const prev = acc[i - 1]?.pct ?? 0;
                 acc.push({ pct: prev + (dur / TOTAL_DURATION_MS) * 100, label: SCENE_LABELS[i + 1] });
@@ -212,26 +224,23 @@ export function VideoPlayer() {
 
             {/* Controls row */}
             <div className="flex items-center gap-3">
-              {/* Play / Pause */}
               <button
+                type="button"
                 onClick={togglePause}
-                className="text-white hover:text-violet-300 transition-colors"
+                className="text-white hover:text-violet-300 transition-colors cursor-pointer"
                 aria-label={paused ? "Play" : "Pause"}
               >
                 {paused ? <Play className="w-6 h-6 fill-white" /> : <Pause className="w-6 h-6" />}
               </button>
 
-              {/* Time */}
               <span className="text-white/70 text-xs font-mono tabular-nums select-none">
                 {formatTime(elapsed)} / {formatTime(TOTAL_DURATION_MS)}
               </span>
 
-              {/* Scene label */}
               <span className="hidden sm:inline text-white/50 text-xs select-none">
                 {SCENE_LABELS[currentScene]}
               </span>
 
-              {/* Scene dots */}
               <div className="flex items-center gap-1.5 flex-1 justify-center">
                 {SCENE_LABELS.map((label, i) => (
                   <div
@@ -251,8 +260,9 @@ export function VideoPlayer() {
               {/* Volume */}
               <div className="flex items-center gap-2">
                 <button
+                  type="button"
                   onClick={toggleMute}
-                  className="text-white hover:text-violet-300 transition-colors"
+                  className="text-white hover:text-violet-300 transition-colors cursor-pointer"
                   aria-label={muted ? "Unmute" : "Mute"}
                 >
                   {muted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
@@ -264,7 +274,7 @@ export function VideoPlayer() {
                   step="0.05"
                   value={muted ? 0 : volume}
                   onChange={handleVolumeChange}
-                  className="w-18 h-1 accent-violet-400 cursor-pointer hidden sm:block"
+                  className="h-1 accent-violet-400 cursor-pointer hidden sm:block"
                   style={{ width: "72px" }}
                 />
               </div>
@@ -272,8 +282,9 @@ export function VideoPlayer() {
               {/* Speed */}
               <div className="relative">
                 <button
+                  type="button"
                   onClick={() => { setShowSpeedMenu((s) => !s); setShowQualityMenu(false); }}
-                  className="flex items-center gap-1 text-white hover:text-violet-300 transition-colors text-sm font-medium"
+                  className="flex items-center gap-1 text-white hover:text-violet-300 transition-colors text-sm font-medium cursor-pointer"
                 >
                   <Gauge className="w-4 h-4" />
                   <span className="hidden sm:inline">{speed}x</span>
@@ -283,16 +294,17 @@ export function VideoPlayer() {
                   {showSpeedMenu && (
                     <motion.div
                       key="speed-menu"
-                      className="absolute bottom-8 right-0 bg-black/90 backdrop-blur border border-white/10 rounded-lg overflow-hidden min-w-[80px]"
+                      className="absolute bottom-8 right-0 bg-black/95 backdrop-blur border border-white/10 rounded-lg overflow-hidden min-w-[80px] z-30"
                       initial={{ opacity: 0, y: 6 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 6 }}
                     >
                       {SPEED_OPTIONS.map((s) => (
                         <button
+                          type="button"
                           key={s}
                           onClick={() => handleSpeedSelect(s)}
-                          className={`w-full px-4 py-2 text-sm text-left hover:bg-violet-600/40 transition-colors ${
+                          className={`w-full px-4 py-2 text-sm text-left hover:bg-violet-600/40 transition-colors cursor-pointer ${
                             speed === s ? "text-violet-300 font-semibold" : "text-white/80"
                           }`}
                         >
@@ -307,8 +319,9 @@ export function VideoPlayer() {
               {/* Quality */}
               <div className="relative">
                 <button
+                  type="button"
                   onClick={() => { setShowQualityMenu((q) => !q); setShowSpeedMenu(false); }}
-                  className="flex items-center gap-1 text-white hover:text-violet-300 transition-colors text-sm font-medium"
+                  className="flex items-center gap-1 text-white hover:text-violet-300 transition-colors text-sm font-medium cursor-pointer"
                 >
                   <Monitor className="w-4 h-4" />
                   <span className="hidden sm:inline">{quality}</span>
@@ -318,16 +331,17 @@ export function VideoPlayer() {
                   {showQualityMenu && (
                     <motion.div
                       key="quality-menu"
-                      className="absolute bottom-8 right-0 bg-black/90 backdrop-blur border border-white/10 rounded-lg overflow-hidden min-w-[80px]"
+                      className="absolute bottom-8 right-0 bg-black/95 backdrop-blur border border-white/10 rounded-lg overflow-hidden min-w-[80px] z-30"
                       initial={{ opacity: 0, y: 6 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 6 }}
                     >
                       {QUALITY_OPTIONS.map((q) => (
                         <button
+                          type="button"
                           key={q}
                           onClick={() => handleQualitySelect(q)}
-                          className={`w-full px-4 py-2 text-sm text-left hover:bg-violet-600/40 transition-colors ${
+                          className={`w-full px-4 py-2 text-sm text-left hover:bg-violet-600/40 transition-colors cursor-pointer ${
                             quality === q ? "text-violet-300 font-semibold" : "text-white/80"
                           }`}
                         >
@@ -348,7 +362,7 @@ export function VideoPlayer() {
         {controlsVisible && (
           <motion.div
             key="top-bar"
-            className="absolute top-0 left-0 right-0 px-5 pt-4 pb-8 pointer-events-none"
+            className="absolute top-0 left-0 right-0 px-5 pt-4 pb-8 pointer-events-none z-10"
             style={{
               background: "linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, transparent 100%)",
             }}
