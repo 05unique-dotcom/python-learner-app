@@ -6,6 +6,7 @@ import { challengesTable } from "./challenges";
 
 export const attemptTable = pgTable("attempts", {
   id: serial("id").primaryKey(),
+  userId: text("user_id").notNull().default("legacy"),
   challengeId: integer("challenge_id").notNull().references(() => challengesTable.id),
   lessonId: integer("lesson_id").notNull().references(() => lessonsTable.id),
   answer: text("answer").notNull(),

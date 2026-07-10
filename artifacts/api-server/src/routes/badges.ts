@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import { eq, sql } from "drizzle-orm";
 import { db, lessonsTable, challengesTable, attemptTable } from "@workspace/db";
+import { getUserId } from "../lib/user";
 
 const router: IRouter = Router();
 
@@ -68,7 +69,7 @@ const BADGE_DEFS: BadgeDef[] = [
   },
 ];
 
-async function computeEarnedBadges(): Promise<Map<string, string>> {
+async function computeEarnedBadges(userId: string): Promise<Map<string, string>> {
   const earned = new Map<string, string>();
   const now = new Date().toISOString();
 
@@ -76,6 +77,7 @@ async function computeEarnedBadges(): Promise<Map<string, string>> {
   const [anyAttempt] = await db
     .select({ createdAt: attemptTable.createdAt })
     .from(attemptTable)
+    .where(eq(attemptTable.userId, userId))
     .orderBy(attemptTable.createdAt)
     .limit(1);
   if (anyAttempt) {
@@ -101,7 +103,7 @@ async function computeEarnedBadges(): Promise<Map<string, string>> {
       .select({ cnt: sql<number>`COUNT(DISTINCT challenge_id)::int` })
       .from(attemptTable)
       .where(
-        sql`${attemptTable.lessonId} = ${lessonId} AND ${attemptTable.correct} = true`
+        sql`${attemptTable.lessonId} = ${lessonId} AND ${attemptTable.correct} = true AND ${attemptTable.userId} = ${userId}`
       );
     if ((correct?.cnt ?? 0) >= total) {
       completedLessons.push(lessonId);
@@ -113,7 +115,7 @@ async function computeEarnedBadges(): Promise<Map<string, string>> {
       .select({ createdAt: attemptTable.createdAt })
       .from(attemptTable)
       .where(
-        sql`${attemptTable.lessonId} = ${completedLessons[0]} AND ${attemptTable.correct} = true`
+        sql`${attemptTable.lessonId} = ${completedLessons[0]} AND ${attemptTable.correct} = true AND ${attemptTable.userId} = ${userId}`
       )
       .orderBy(attemptTable.createdAt)
       .limit(1);
@@ -135,13 +137,13 @@ async function computeEarnedBadges(): Promise<Map<string, string>> {
       .select({ cnt: sql<number>`COUNT(*)::int` })
       .from(attemptTable)
       .where(
-        sql`${attemptTable.lessonId} = ${lessonId} AND ${attemptTable.correct} = false`
+        sql`${attemptTable.lessonId} = ${lessonId} AND ${attemptTable.correct} = false AND ${attemptTable.userId} = ${userId}`
       );
     const [correctCount] = await db
       .select({ cnt: sql<number>`COUNT(DISTINCT challenge_id)::int` })
       .from(attemptTable)
       .where(
-        sql`${attemptTable.lessonId} = ${lessonId} AND ${attemptTable.correct} = true`
+        sql`${attemptTable.lessonId} = ${lessonId} AND ${attemptTable.correct} = true AND ${attemptTable.userId} = ${userId}`
       );
     if ((wrongCount?.cnt ?? 0) === 0 && (correctCount?.cnt ?? 0) >= total) {
       earned.set("perfect_lesson", now);
@@ -155,7 +157,8 @@ async function computeEarnedBadges(): Promise<Map<string, string>> {
       total: sql<number>`COUNT(*)::int`,
       correct: sql<number>`COUNT(CASE WHEN correct = true THEN 1 END)::int`,
     })
-    .from(attemptTable);
+    .from(attemptTable)
+    .where(eq(attemptTable.userId, userId));
   const totalAttempts = summary?.total ?? 0;
   const correctAttempts = summary?.correct ?? 0;
   if (totalAttempts >= 10 && correctAttempts / totalAttempts >= 0.9) {
@@ -169,7 +172,7 @@ async function computeEarnedBadges(): Promise<Map<string, string>> {
 
   // streak_3 / streak_7: compute longest streak from attempt dates
   const dateRows = await db.execute<{ date: string }>(
-    sql`SELECT DISTINCT DATE(created_at AT TIME ZONE 'UTC')::text AS date FROM attempts ORDER BY date`
+    sql`SELECT DISTINCT DATE(created_at AT TIME ZONE 'UTC')::text AS date FROM attempts WHERE user_id = ${userId} ORDER BY date`
   );
   const sortedDates = dateRows.rows.map((r) => r.date);
   let longestStreak = 0;
@@ -192,8 +195,9 @@ async function computeEarnedBadges(): Promise<Map<string, string>> {
   return earned;
 }
 
-router.get("/badges", async (_req, res): Promise<void> => {
-  const earned = await computeEarnedBadges();
+router.get("/badges", async (req, res): Promise<void> => {
+  const userId = getUserId(req);
+  const earned = await computeEarnedBadges(userId);
 
   const badges = BADGE_DEFS.map((def) => ({
     ...def,

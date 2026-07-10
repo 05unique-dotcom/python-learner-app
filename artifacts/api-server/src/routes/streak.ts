@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
 import { sql } from "drizzle-orm";
 import { db, attemptTable } from "@workspace/db";
+import { getUserId } from "../lib/user";
 
 const router: IRouter = Router();
 
@@ -8,10 +9,11 @@ function toLocalDateStr(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
 
-router.get("/streak", async (_req, res): Promise<void> => {
+router.get("/streak", async (req, res): Promise<void> => {
+  const userId = getUserId(req);
   // Get all distinct activity dates (UTC) from attempts
   const rows = await db.execute<{ date: string }>(
-    sql`SELECT DISTINCT DATE(created_at AT TIME ZONE 'UTC')::text AS date FROM attempts ORDER BY date`
+    sql`SELECT DISTINCT DATE(created_at AT TIME ZONE 'UTC')::text AS date FROM attempts WHERE user_id = ${userId} ORDER BY date`
   );
 
   const activeDates = new Set(rows.rows.map((r) => r.date));

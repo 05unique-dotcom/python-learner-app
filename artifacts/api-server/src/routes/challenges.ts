@@ -5,6 +5,7 @@ import {
   SubmitAttemptParams,
   SubmitAttemptBody,
 } from "@workspace/api-zod";
+import { getUserId } from "../lib/user";
 
 const router: IRouter = Router();
 
@@ -33,8 +34,10 @@ router.post("/challenges/:id/attempt", async (req, res): Promise<void> => {
   }
 
   const correct = body.data.answer.trim().toLowerCase() === challenge.correctAnswer.trim().toLowerCase();
+  const userId = getUserId(req);
 
   await db.insert(attemptTable).values({
+    userId,
     challengeId: challenge.id,
     lessonId: challenge.lessonId,
     answer: body.data.answer,

@@ -1,28 +1,31 @@
 import { Router, type IRouter } from "express";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { db, lessonsTable, challengesTable, attemptTable } from "@workspace/db";
+import { getUserId } from "../lib/user";
 
 const router: IRouter = Router();
 
-router.get("/progress/summary", async (_req, res): Promise<void> => {
+router.get("/progress/summary", async (req, res): Promise<void> => {
+  const userId = getUserId(req);
+
   const [totals] = await db
     .select({
       totalLessons: sql<number>`(SELECT COUNT(*)::int FROM lessons)`,
       totalChallenges: sql<number>`(SELECT COUNT(*)::int FROM challenges)`,
-      correctAttempts: sql<number>`(SELECT COUNT(*)::int FROM attempts WHERE correct = true)`,
-      totalAttempts: sql<number>`(SELECT COUNT(*)::int FROM attempts)`,
+      correctAttempts: sql<number>`(SELECT COUNT(*)::int FROM attempts WHERE correct = true AND user_id = ${userId})`,
+      totalAttempts: sql<number>`(SELECT COUNT(*)::int FROM attempts WHERE user_id = ${userId})`,
     })
     .from(sql`(SELECT 1) AS dummy`);
 
   const completedLessonsResult = await db
     .selectDistinct({ lessonId: attemptTable.lessonId })
     .from(attemptTable)
-    .where(eq(attemptTable.correct, true));
+    .where(and(eq(attemptTable.correct, true), eq(attemptTable.userId, userId)));
 
   const completedChallengesResult = await db
     .selectDistinct({ challengeId: attemptTable.challengeId })
     .from(attemptTable)
-    .where(eq(attemptTable.correct, true));
+    .where(and(eq(attemptTable.correct, true), eq(attemptTable.userId, userId)));
 
   res.json({
     totalLessons: totals?.totalLessons ?? 0,
@@ -34,7 +37,8 @@ router.get("/progress/summary", async (_req, res): Promise<void> => {
   });
 });
 
-router.get("/progress/lessons", async (_req, res): Promise<void> => {
+router.get("/progress/lessons", async (req, res): Promise<void> => {
+  const userId = getUserId(req);
   const lessons = await db.select({ id: lessonsTable.id }).from(lessonsTable);
 
   const result = await Promise.all(
@@ -45,7 +49,7 @@ router.get("/progress/lessons", async (_req, res): Promise<void> => {
           correctChallenges: sql<number>`COUNT(DISTINCT CASE WHEN correct = true THEN challenge_id END)::int`,
         })
         .from(attemptTable)
-        .where(eq(attemptTable.lessonId, lesson.id));
+        .where(and(eq(attemptTable.lessonId, lesson.id), eq(attemptTable.userId, userId)));
 
       const [challengeCount] = await db
         .select({ total: sql<number>`COUNT(*)::int` })

@@ -2,10 +2,12 @@ import { Router, type IRouter } from "express";
 import { eq, sql } from "drizzle-orm";
 import { db, lessonsTable, challengesTable, attemptTable } from "@workspace/db";
 import { computeEarnedBadges } from "./badges";
+import { getUserId } from "../lib/user";
 
 const router: IRouter = Router();
 
-router.get("/certificate", async (_req, res): Promise<void> => {
+router.get("/certificate", async (req, res): Promise<void> => {
+  const userId = getUserId(req);
   const lessons = await db.select({ id: lessonsTable.id }).from(lessonsTable);
   const totalLessons = lessons.length;
 
@@ -14,7 +16,8 @@ router.get("/certificate", async (_req, res): Promise<void> => {
       totalAttempts: sql<number>`COUNT(*)::int`,
       correctAttempts: sql<number>`COUNT(CASE WHEN correct = true THEN 1 END)::int`,
     })
-    .from(attemptTable);
+    .from(attemptTable)
+    .where(eq(attemptTable.userId, userId));
 
   const totalAttempts = attemptSummary?.totalAttempts ?? 0;
   const correctAttempts = attemptSummary?.correctAttempts ?? 0;
@@ -28,7 +31,7 @@ router.get("/certificate", async (_req, res): Promise<void> => {
   const [completedChallengeResult] = await db
     .select({ cnt: sql<number>`COUNT(DISTINCT challenge_id)::int` })
     .from(attemptTable)
-    .where(eq(attemptTable.correct, true));
+    .where(sql`${attemptTable.correct} = true AND ${attemptTable.userId} = ${userId}`);
   const completedChallenges = completedChallengeResult?.cnt ?? 0;
 
   // Check each lesson is complete
@@ -46,7 +49,7 @@ router.get("/certificate", async (_req, res): Promise<void> => {
       .select({ cnt: sql<number>`COUNT(DISTINCT challenge_id)::int` })
       .from(attemptTable)
       .where(
-        sql`${attemptTable.lessonId} = ${lesson.id} AND ${attemptTable.correct} = true`
+        sql`${attemptTable.lessonId} = ${lesson.id} AND ${attemptTable.correct} = true AND ${attemptTable.userId} = ${userId}`
       );
     if ((correctRow?.cnt ?? 0) >= lessonTotal) {
       completedLessons++;
@@ -55,7 +58,7 @@ router.get("/certificate", async (_req, res): Promise<void> => {
         .select({ createdAt: attemptTable.createdAt })
         .from(attemptTable)
         .where(
-          sql`${attemptTable.lessonId} = ${lesson.id} AND ${attemptTable.correct} = true`
+          sql`${attemptTable.lessonId} = ${lesson.id} AND ${attemptTable.correct} = true AND ${attemptTable.userId} = ${userId}`
         )
         .orderBy(sql`created_at DESC`)
         .limit(1);
@@ -66,7 +69,7 @@ router.get("/certificate", async (_req, res): Promise<void> => {
   }
 
   const earned = totalLessons > 0 && completedLessons >= totalLessons;
-  const earnedBadges = await computeEarnedBadges();
+  const earnedBadges = await computeEarnedBadges(userId);
 
   res.json({
     earned,
