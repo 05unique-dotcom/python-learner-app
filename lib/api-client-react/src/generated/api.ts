@@ -25,6 +25,7 @@ import type {
   Badge,
   Certificate,
   Challenge,
+  GetQuickChallengeParams,
   HealthStatus,
   Lesson,
   LessonDetail,
@@ -341,6 +342,90 @@ export function useGetLessonChallenges<TData = Awaited<ReturnType<typeof getLess
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetLessonChallengesQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetQuickChallengeUrl = (params?: GetQuickChallengeParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/challenges/quick?${stringifiedParams}` : `/api/challenges/quick`
+}
+
+/**
+ * @summary Get a random set of challenges for the Quick Challenge mode
+ */
+export const getQuickChallenge = async (params?: GetQuickChallengeParams, options?: RequestInit): Promise<Challenge[]> => {
+
+  return customFetch<Challenge[]>(getGetQuickChallengeUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetQuickChallengeQueryKey = (params?: GetQuickChallengeParams,) => {
+    return [
+    `/api/challenges/quick`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetQuickChallengeQueryOptions = <TData = Awaited<ReturnType<typeof getQuickChallenge>>, TError = ErrorType<unknown>>(params?: GetQuickChallengeParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getQuickChallenge>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetQuickChallengeQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getQuickChallenge>>> = ({ signal }) => getQuickChallenge(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getQuickChallenge>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetQuickChallengeQueryResult = NonNullable<Awaited<ReturnType<typeof getQuickChallenge>>>
+export type GetQuickChallengeQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get a random set of challenges for the Quick Challenge mode
+ */
+
+export function useGetQuickChallenge<TData = Awaited<ReturnType<typeof getQuickChallenge>>, TError = ErrorType<unknown>>(
+ params?: GetQuickChallengeParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getQuickChallenge>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetQuickChallengeQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

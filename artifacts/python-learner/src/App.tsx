@@ -6,12 +6,14 @@ import { Home } from "@/pages/Home";
 import { Lessons } from "@/pages/Lessons";
 import { LessonDetail } from "@/pages/LessonDetail";
 import { ChallengeMode } from "@/pages/ChallengeMode";
+import { QuickChallenge } from "@/pages/QuickChallenge";
 import { Badges } from "@/pages/Badges";
 import { Leaderboard } from "@/pages/Leaderboard";
 import { Certificate } from "@/pages/Certificate";
 import NotFound from "@/pages/not-found";
 import { Shell } from "@/components/layout/Shell";
 import { VideoPlayer } from "@/components/video/VideoPlayer";
+import { ThemeProvider } from "@/hooks/use-theme";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +25,9 @@ function Router() {
       </Route>
       <Route path="/challenges/:lessonId">
         {(params) => <ChallengeMode />}
+      </Route>
+      <Route path="/quick-challenge">
+        <QuickChallenge />
       </Route>
       <Route path="*">
         <Shell>
@@ -44,12 +49,14 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-          <Router />
-        </WouterRouter>
-        <Toaster />
-      </TooltipProvider>
+      <ThemeProvider>
+        <TooltipProvider>
+          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+            <Router />
+          </WouterRouter>
+          <Toaster />
+        </TooltipProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

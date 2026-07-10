@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { db, challengesTable, attemptTable } from "@workspace/db";
 import {
   SubmitAttemptParams,
@@ -8,6 +8,27 @@ import {
 import { getUserId } from "../lib/user";
 
 const router: IRouter = Router();
+
+router.get("/challenges/quick", async (req, res): Promise<void> => {
+  const rawCount = Array.isArray(req.query.count) ? req.query.count[0] : req.query.count;
+  const parsedCount = parseInt(String(rawCount ?? "10"), 10);
+  const count = Number.isFinite(parsedCount) && parsedCount > 0 ? Math.min(parsedCount, 50) : 10;
+
+  const challenges = await db
+    .select({
+      id: challengesTable.id,
+      lessonId: challengesTable.lessonId,
+      question: challengesTable.question,
+      type: challengesTable.type,
+      options: challengesTable.options,
+      explanation: challengesTable.explanation,
+    })
+    .from(challengesTable)
+    .orderBy(sql`random()`)
+    .limit(count);
+
+  res.json(challenges);
+});
 
 router.post("/challenges/:id/attempt", async (req, res): Promise<void> => {
   const raw = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;

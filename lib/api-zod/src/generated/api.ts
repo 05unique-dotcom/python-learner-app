@@ -67,6 +67,26 @@ export const GetLessonChallengesResponse = zod.array(GetLessonChallengesResponse
 
 
 /**
+ * @summary Get a random set of challenges for the Quick Challenge mode
+ */
+export const getQuickChallengeQueryCountDefault = 10;
+
+export const GetQuickChallengeQueryParams = zod.object({
+  "count": zod.coerce.number().default(getQuickChallengeQueryCountDefault)
+})
+
+export const GetQuickChallengeResponseItem = zod.object({
+  "id": zod.number(),
+  "lessonId": zod.number(),
+  "question": zod.string(),
+  "type": zod.enum(['multiple_choice', 'fill_blank']),
+  "options": zod.array(zod.string()),
+  "explanation": zod.string()
+})
+export const GetQuickChallengeResponse = zod.array(GetQuickChallengeResponseItem)
+
+
+/**
  * @summary Submit an answer attempt for a challenge
  */
 export const SubmitAttemptParams = zod.object({

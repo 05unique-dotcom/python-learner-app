@@ -13,6 +13,7 @@ export * from './certificate';
 export * from './challenge';
 export * from './challengeType';
 export * from './dayActivity';
+export * from './getQuickChallengeParams';
 export * from './healthStatus';
 export * from './lesson';
 export * from './lessonDetail';

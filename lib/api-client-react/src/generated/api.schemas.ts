@@ -125,3 +125,7 @@ export interface StreakData {
   monthActivity: DayActivity[];
 }
 
+export type GetQuickChallengeParams = {
+count?: number;
+};
+

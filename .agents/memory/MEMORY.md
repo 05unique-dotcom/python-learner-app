@@ -1,0 +1,1 @@
+- [Scripts package DB seeding](scripts-db-seeding.md) — @workspace/scripts needs direct deps (@workspace/db, drizzle-orm) added itself; workspace hoisting doesn't cover transitive imports in seed scripts.

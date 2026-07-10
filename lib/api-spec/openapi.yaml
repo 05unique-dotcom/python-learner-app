@@ -91,6 +91,28 @@ paths:
                 items:
                   $ref: "#/components/schemas/Challenge"
 
+  /challenges/quick:
+    get:
+      operationId: getQuickChallenge
+      tags: [challenges]
+      summary: Get a random set of challenges for the Quick Challenge mode
+      parameters:
+        - name: count
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 10
+      responses:
+        "200":
+          description: Random list of challenges
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Challenge"
+
   /challenges/{id}/attempt:
     post:
       operationId: submitAttempt
