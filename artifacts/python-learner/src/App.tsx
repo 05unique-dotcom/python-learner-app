@@ -7,6 +7,7 @@ import { Lessons } from "@/pages/Lessons";
 import { LessonDetail } from "@/pages/LessonDetail";
 import { ChallengeMode } from "@/pages/ChallengeMode";
 import { Badges } from "@/pages/Badges";
+import { Leaderboard } from "@/pages/Leaderboard";
 import { Certificate } from "@/pages/Certificate";
 import NotFound from "@/pages/not-found";
 import { Shell } from "@/components/layout/Shell";
@@ -30,6 +31,7 @@ function Router() {
             <Route path="/lessons" component={Lessons} />
             <Route path="/lessons/:id" component={LessonDetail} />
             <Route path="/badges" component={Badges} />
+            <Route path="/leaderboard" component={Leaderboard} />
             <Route path="/certificate" component={Certificate} />
             <Route component={NotFound} />
           </Switch>

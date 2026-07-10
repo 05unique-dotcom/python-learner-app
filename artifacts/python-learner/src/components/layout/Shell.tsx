@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { Terminal, BookOpen, Home, Award, GraduationCap, Play } from "lucide-react";
+import { Terminal, BookOpen, Home, Award, GraduationCap, Play, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ShareButton } from "./ShareButton";
 
@@ -33,6 +33,10 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <Link href="/certificate" className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${location.startsWith('/certificate') ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground hover:text-foreground'}`}>
             <GraduationCap className="w-5 h-5" />
             <span className="font-medium">Certificate</span>
+          </Link>
+          <Link href="/leaderboard" className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${location.startsWith('/leaderboard') ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground hover:text-foreground'}`}>
+            <Trophy className="w-5 h-5" />
+            <span className="font-medium">Leaderboard</span>
           </Link>
           <Link href="/video" className={`flex items-center gap-3 px-3 py-2 rounded-md transition-colors ${location.startsWith('/video') ? 'bg-primary text-primary-foreground' : 'hover:bg-muted text-muted-foreground hover:text-foreground'}`}>
             <Play className="w-5 h-5" />
