@@ -207,6 +207,53 @@ paths:
               schema:
                 $ref: "#/components/schemas/StreakData"
 
+  /rewards:
+    get:
+      operationId: getRewards
+      tags: [rewards]
+      summary: Get current user's points breakdown and reward unlock status
+      responses:
+        "200":
+          description: Rewards data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RewardsData"
+
+  /leaderboard:
+    get:
+      operationId: getLeaderboard
+      tags: [rewards]
+      summary: Get real leaderboard rankings based on actual user points
+      responses:
+        "200":
+          description: Leaderboard entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LeaderboardEntry"
+
+  /me:
+    put:
+      operationId: updateMe
+      tags: [rewards]
+      summary: Set the current user's display name
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMeInput"
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+
 components:
   schemas:
     HealthStatus:
@@ -397,3 +444,98 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/DayActivity"
+
+    RewardItem:
+      type: object
+      required: [id, name, icon, threshold, description, unlocked]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        icon:
+          type: string
+        threshold:
+          type: integer
+        description:
+          type: string
+        unlocked:
+          type: boolean
+
+    RewardsData:
+      type: object
+      required:
+        - totalPoints
+        - lessonPoints
+        - quizPoints
+        - streakPoints
+        - courseBonus
+        - currentStreak
+        - completedLessons
+        - totalLessons
+        - rewards
+        - nextReward
+        - pointsToNextReward
+        - progressToNextReward
+      properties:
+        totalPoints:
+          type: integer
+        lessonPoints:
+          type: integer
+        quizPoints:
+          type: integer
+        streakPoints:
+          type: integer
+        courseBonus:
+          type: integer
+        currentStreak:
+          type: integer
+        completedLessons:
+          type: integer
+        totalLessons:
+          type: integer
+        rewards:
+          type: array
+          items:
+            $ref: "#/components/schemas/RewardItem"
+        nextReward:
+          $ref: "#/components/schemas/RewardItem"
+          nullable: true
+        pointsToNextReward:
+          type: integer
+        progressToNextReward:
+          type: number
+
+    LeaderboardEntry:
+      type: object
+      required: [userId, displayName, points, completedLessons, badgesEarned, isYou]
+      properties:
+        userId:
+          type: string
+        displayName:
+          type: string
+        points:
+          type: integer
+        completedLessons:
+          type: integer
+        badgesEarned:
+          type: integer
+        isYou:
+          type: boolean
+
+    UpdateMeInput:
+      type: object
+      required: [displayName]
+      properties:
+        displayName:
+          type: string
+
+    UserProfile:
+      type: object
+      required: [userId, displayName]
+      properties:
+        userId:
+          type: string
+        displayName:
+          type: string
+          nullable: true

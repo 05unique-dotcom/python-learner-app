@@ -1,5 +1,5 @@
-import { useGetCertificate, getGetCertificateQueryKey } from "@workspace/api-client-react";
-import { useState, useEffect } from "react";
+import { useGetCertificate, getGetCertificateQueryKey, useUpdateMe } from "@workspace/api-client-react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { GraduationCap, Lock, Printer, Award, BookOpen, Code, Target, Star } from "lucide-react";
@@ -8,6 +8,8 @@ import { format } from "date-fns";
 export function Certificate() {
   const { data: cert, isLoading } = useGetCertificate({ query: { queryKey: getGetCertificateQueryKey() } });
   const [name, setName] = useState("");
+  const { mutate: updateMe } = useUpdateMe();
+  const syncTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const savedName =localStorage.getItem("pythonLearnerName");
@@ -15,8 +17,16 @@ export function Certificate() {
   }, []);
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setName(e.target.value);
-    localStorage.setItem("pythonLearnerName", e.target.value);
+    const value = e.target.value;
+    setName(value);
+    localStorage.setItem("pythonLearnerName", value);
+
+    if (syncTimeout.current) clearTimeout(syncTimeout.current);
+    syncTimeout.current = setTimeout(() => {
+      if (value.trim().length > 0) {
+        updateMe({ data: { displayName: value.trim() } });
+      }
+    }, 600);
   };
 
   const handlePrint = () => {

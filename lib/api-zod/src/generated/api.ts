@@ -176,3 +176,63 @@ export const GetStreakResponse = zod.object({
 })
 
 
+/**
+ * @summary Get current user's points breakdown and reward unlock status
+ */
+export const GetRewardsResponse = zod.object({
+  "totalPoints": zod.number(),
+  "lessonPoints": zod.number(),
+  "quizPoints": zod.number(),
+  "streakPoints": zod.number(),
+  "courseBonus": zod.number(),
+  "currentStreak": zod.number(),
+  "completedLessons": zod.number(),
+  "totalLessons": zod.number(),
+  "rewards": zod.array(zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "icon": zod.string(),
+  "threshold": zod.number(),
+  "description": zod.string(),
+  "unlocked": zod.boolean()
+})),
+  "nextReward": zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "icon": zod.string(),
+  "threshold": zod.number(),
+  "description": zod.string(),
+  "unlocked": zod.boolean()
+}).nullable(),
+  "pointsToNextReward": zod.number(),
+  "progressToNextReward": zod.number()
+})
+
+
+/**
+ * @summary Get real leaderboard rankings based on actual user points
+ */
+export const GetLeaderboardResponseItem = zod.object({
+  "userId": zod.string(),
+  "displayName": zod.string(),
+  "points": zod.number(),
+  "completedLessons": zod.number(),
+  "badgesEarned": zod.number(),
+  "isYou": zod.boolean()
+})
+export const GetLeaderboardResponse = zod.array(GetLeaderboardResponseItem)
+
+
+/**
+ * @summary Set the current user's display name
+ */
+export const UpdateMeBody = zod.object({
+  "displayName": zod.string()
+})
+
+export const UpdateMeResponse = zod.object({
+  "userId": zod.string(),
+  "displayName": zod.string().nullable()
+})
+
+

@@ -1,1 +1,2 @@
 - [Scripts package DB seeding](scripts-db-seeding.md) — @workspace/scripts needs direct deps (@workspace/db, drizzle-orm) added itself; workspace hoisting doesn't cover transitive imports in seed scripts.
+- [Python Learner points/rewards architecture](python-learner-points.md) — points/leaderboard computed on-the-fly from attempts, matching existing badges/progress pattern; no ledger table.

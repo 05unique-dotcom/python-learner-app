@@ -125,6 +125,48 @@ export interface StreakData {
   monthActivity: DayActivity[];
 }
 
+export interface RewardItem {
+  id: string;
+  name: string;
+  icon: string;
+  threshold: number;
+  description: string;
+  unlocked: boolean;
+}
+
+export interface RewardsData {
+  totalPoints: number;
+  lessonPoints: number;
+  quizPoints: number;
+  streakPoints: number;
+  courseBonus: number;
+  currentStreak: number;
+  completedLessons: number;
+  totalLessons: number;
+  rewards: RewardItem[];
+  nextReward: RewardItem | null;
+  pointsToNextReward: number;
+  progressToNextReward: number;
+}
+
+export interface LeaderboardEntry {
+  userId: string;
+  displayName: string;
+  points: number;
+  completedLessons: number;
+  badgesEarned: number;
+  isYou: boolean;
+}
+
+export interface UpdateMeInput {
+  displayName: string;
+}
+
+export interface UserProfile {
+  userId: string;
+  displayName: string | null;
+}
+
 export type GetQuickChallengeParams = {
 count?: number;
 };
