@@ -8,6 +8,9 @@ A UI prototyping sandbox with an infinite canvas — build, preview, and iterate
 
 > https://python-learner--05unique7057.replit.app
 
+## 📂 GitHub Repository
+https://github.com/05unique-dotcom/python-learner-app
+
 ---
 
 ## ⚙️ Run & Operate
