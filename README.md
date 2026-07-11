@@ -101,8 +101,32 @@ pnpm --filter @workspace/db run push
 
 ---
 
-## 🏗️ Architecture Decisions
+🎯 Future Improvements
+👤 User Login & Registration
+📈 Learning Progress Tracking
+🏆 Certificates after course completion
+🌙 Dark Mode
+🤖 AI-powered coding assistant
+📖 More Python topics
+🧠 Coding challenges
+🤝 Contributing
+Contributions, suggestions, and improvements are welcome.
+Fork this repository
+Create a new branch
+Make your changes
+Commit your changes
+Submit a Pull Request
+```
 
+---
+
+👨‍💻 Author:
+Arshad Ansari
+GitHub: https://github.com/05unique-dotcom
+## 🏗️ Architecture Decisions
+```
+
+---
 - **Orval codegen from OpenAPI spec** — API types, React Query hooks, and Zod validators are all generated from a single `openapi.yaml` source of truth. Never edit generated files manually.
 - **`customFetch` as Orval mutator** — A handwritten fetch wrapper handles bearer auth tokens, base URL injection, smart response parsing (JSON/text/blob), and typed `ApiError` with structured error messages.
 - **`mockupPreviewPlugin` (Vite)** — A custom Vite plugin watches `src/components/mockups/` and auto-generates a module map so all mockup components are discoverable at `/preview/*` routes without manual registration.
