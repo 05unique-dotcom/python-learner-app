@@ -174,6 +174,10 @@ Pull requests are welcome! For major changes, please open an issue first to disc
 
 ---
 
-## 📄 License
+⭐ Support
+If you found this project useful, consider giving it a ⭐ Star on GitHub.
+Your support motivates me to build more useful open-source projects.
 
-MIT
+
+📄 License
+This project is licensed under the MIT License.
