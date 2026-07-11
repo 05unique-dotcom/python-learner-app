@@ -6,7 +6,7 @@ A UI prototyping sandbox with an infinite canvas — build, preview, and iterate
 
 ## 🚀 Live Demo
 
-> Add your deployed URL here
+> https://python-learner--05unique7057.replit.app
 
 ---
 
