@@ -1,210 +1,256 @@
-# 🎨 Mockup Canvas
+# 🐍 Python Learner App
 
-A UI prototyping sandbox with an infinite canvas — build, preview, and iterate on interface mockups directly in the browser.
+> An interactive web-based Python learning platform designed to help beginners master Python programming with lessons, quizzes, badges, and certificates.
 
----
-
-## 🚀 Live Demo
-
-> https://python-learner--05unique7057.replit.app
-
-## 📂 GitHub Repository
-https://github.com/05unique-dotcom/python-learner-app
+[![GitHub stars](https://img.shields.io/github/stars/05unique-dotcom/python-learner-app?style=social)](https://github.com/05unique-dotcom/python-learner-app)
+[![GitHub forks](https://img.shields.io/github/forks/05unique-dotcom/python-learner-app?style=social)](https://github.com/05unique-dotcom/python-learner-app)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ---
 
-## ⚙️ Run & Operate
+## ✨ Features
+
+- 📚 **Structured Lessons** - Learn Python concepts step-by-step
+- 🎯 **Interactive Quizzes** - Test your knowledge after each lesson
+- 🏆 **Badge System** - Earn badges as you progress
+- 🎓 **Certificate of Completion** - Get a certificate after finishing the course
+- 🌐 **Modern Web Interface** - Built with React and Tailwind CSS
+- 🚀 **Live Preview** - See code examples in real-time
+- 📱 **Responsive Design** - Works on desktop, tablet, and mobile
+
+---
+
+## 🎮 Live Demo
+
+Check out the live version here:
+> **[Python Learner App - Live Demo](https://python-learner--05unique7057.replit.app)**
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js 24+
+- pnpm (package manager)
+- PostgreSQL (for database)
+
+### Installation
 
 ```bash
-# Start the API server (port 5000)
+# 1. Clone the repository
+git clone https://github.com/05unique-dotcom/python-learner-app.git
+cd python-learner-app
+
+# 2. Install dependencies
+pnpm install
+
+# 3. Set up environment variables
+cp .env.example .env
+# Edit .env and add your configuration:
+# - DATABASE_URL: PostgreSQL connection string
+# - PORT: Server port (e.g., 5000)
+# - BASE_PATH: Base path for Vite build (e.g., /)
+
+# 4. Initialize the database
+pnpm --filter @workspace/db run push
+
+# 5. Start the API server (Terminal 1)
 pnpm --filter @workspace/api-server run dev
 
-# Full typecheck across all packages
-pnpm run typecheck
-
-# Typecheck + build all packages
-pnpm run build
-
-# Regenerate API hooks and Zod schemas from OpenAPI spec
-pnpm --filter @workspace/api-spec run codegen
-
-# Push DB schema changes (dev only)
-pnpm --filter @workspace/db run push
+# 6. Start the frontend (Terminal 2)
+cd apps/web && pnpm dev
 ```
 
-### Required Environment Variables
-
-| Variable | Description |
-|---|---|
-| `DATABASE_URL` | PostgreSQL connection string |
-| `PORT` | Port for the API server and Vite dev server |
-| `BASE_PATH` | Base path for the Vite build (e.g. `/`) |
+The app will be available at `http://localhost:5173` (frontend) and API at `http://localhost:5000`.
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Package Manager | pnpm workspaces |
-| Runtime | Node.js 24 |
-| Language | TypeScript 5.9 |
-| Frontend Framework | React + Vite |
-| API | Express 5 |
-| Database | PostgreSQL + Drizzle ORM |
-| Validation | Zod (`zod/v4`), `drizzle-zod` |
-| API Client | TanStack React Query |
-| API Codegen | Orval (from OpenAPI spec → React Query hooks + Zod schemas) |
-| Build Tool | esbuild (CJS bundle) |
-| Styling | Tailwind CSS v4 + `tw-animate-css` |
-| UI Components | shadcn/ui |
-| Logging | Pino + pino-http |
-| Fonts | Google Fonts (Inter, Geist, JetBrains Mono, and more) |
+| Component | Technology |
+|-----------|-----------|
+| **Frontend** | React 19 + Vite + TypeScript |
+| **Backend** | Express 5 + Node.js 24 |
+| **Database** | PostgreSQL + Drizzle ORM |
+| **Styling** | Tailwind CSS v4 + shadcn/ui |
+| **API** | REST API + OpenAPI spec |
+| **Validation** | Zod + drizzle-zod |
+| **State Management** | TanStack React Query |
+| **Package Manager** | pnpm workspaces |
 
 ---
 
 ## 📁 Project Structure
 
 ```
-/
+python-learner-app/
 ├── packages/
-│   ├── api-server/               # Express 5 API server
+│   ├── api-server/              # Express backend
 │   │   ├── src/
-│   │   │   ├── app.ts            # Express app setup (CORS, logging, routes)
-│   │   │   ├── index.ts          # Server entry point (reads PORT env var)
-│   │   │   └── routes/           # API route handlers
-│   │   └── drizzle.config.ts     # Drizzle ORM config (reads DATABASE_URL)
+│   │   │   ├── app.ts
+│   │   │   ├── index.ts
+│   │   │   └── routes/
+│   │   └── drizzle.config.ts
 │   │
-│   ├── api-spec/                 # OpenAPI spec + Orval codegen config
-│   │   └── orval.config.ts       # Generates React Query hooks & Zod schemas
-│   │
-│   ├── db/                       # Database package
+│   ├── db/                      # Database schemas & ORM
 │   │   └── src/
-│   │       ├── index.ts          # Drizzle client + pg Pool setup
-│   │       └── schema/           # Drizzle table schemas
+│   │       ├── index.ts
+│   │       └── schema/
+│   │
+│   ├── api-spec/                # OpenAPI specification
+│   │   └── orval.config.ts
 │   │
 │   └── lib/
-│       ├── api-client-react/     # Generated React Query hooks (do not edit)
-│       │   └── src/
-│       │       ├── custom-fetch.ts   # Smart fetch wrapper (auth, errors, base URL)
-│       │       └── generated/        # Auto-generated by Orval
-│       └── api-zod/              # Generated Zod validators (do not edit)
+│       ├── api-client-react/    # Generated API hooks
+│       └── api-zod/             # Generated validation schemas
 │
-├── apps/
-│   └── web/                      # React frontend (Vite)
-│       ├── index.html            # HTML shell (single entry for all routes)
-│       ├── index.css             # Global styles + Tailwind design tokens
-│       ├── vite.config.ts        # Vite config with mockupPreviewPlugin
-│       ├── mockupPreviewPlugin.ts # Auto-discovers mockup components
-│       └── src/
-│           ├── main.tsx          # React entry point
-│           └── components/
-│               └── mockups/      # Drop .tsx files here → auto-registered for preview
+└── apps/
+    └── web/                     # React frontend
+        ├── src/
+        │   ├── components/
+        │   ├── pages/
+        │   └── main.tsx
+        └── vite.config.ts
 ```
 
 ---
 
-🎯 Future Improvements
-👤 User Login & Registration
-📈 Learning Progress Tracking
-🏆 Certificates after course completion
-🌙 Dark Mode
-🤖 AI-powered coding assistant
-📖 More Python topics
-🧠 Coding challenges
-🤝 Contributing
-Contributions, suggestions, and improvements are welcome.
-Fork this repository
-Create a new branch
-Make your changes
-Commit your changes
-Submit a Pull Request
-```
+## 🎯 Planned Features (Future)
+
+- [ ] User authentication & registration
+- [ ] Learning progress tracking dashboard
+- [ ] More Python topics & advanced courses
+- [ ] AI-powered coding assistant
+- [ ] Coding challenges with difficulty levels
+- [ ] Dark mode support
+- [ ] Community forum
+- [ ] Leaderboard system
+- [ ] Mobile app
 
 ---
 
-👨‍💻 Author:
-Arshad Ansari
-GitHub: https://github.com/05unique-dotcom
-## 🏗️ Architecture Decisions
-```
-
----
-- **Orval codegen from OpenAPI spec** — API types, React Query hooks, and Zod validators are all generated from a single `openapi.yaml` source of truth. Never edit generated files manually.
-- **`customFetch` as Orval mutator** — A handwritten fetch wrapper handles bearer auth tokens, base URL injection, smart response parsing (JSON/text/blob), and typed `ApiError` with structured error messages.
-- **`mockupPreviewPlugin` (Vite)** — A custom Vite plugin watches `src/components/mockups/` and auto-generates a module map so all mockup components are discoverable at `/preview/*` routes without manual registration.
-- **pnpm workspaces** — Packages are separated by concern (API server, DB, API spec, generated client libs, frontend) to keep boundaries clear and enable independent builds.
-- **Dark/Light theming via CSS custom properties** — All design tokens (colors, radius, spacing) are defined in `index.css` under `:root` and `.dark`, making theme switching a single class toggle.
-
----
-
-## 🎨 Theming
-
-Supports **Light** and **Dark** mode via CSS custom properties defined in `index.css`.
-
-- Light mode: default on `:root`
-- Dark mode: add `.dark` class to the root element
-- Fully customizable tokens: colors, border-radius, spacing, typography
-
----
-
-## 🔌 API
-
-The API server runs on `/api/*`. Example endpoint:
-
-| Method | Path | Description |
-|---|---|---|
-| `GET` | `/api/healthz` | Health check — returns `{ status: string }` |
-
-Add new routes in `packages/api-server/src/routes/` and define them in `openapi.yaml`, then run codegen to regenerate the client.
-
----
-
-## 📦 Getting Started
+## 🔧 Common Commands
 
 ```bash
-# 1. Clone the repo
-git clone https://github.com/your-username/mockup-canvas.git
-cd mockup-canvas
+# Type checking across all packages
+pnpm run typecheck
 
-# 2. Install dependencies
-pnpm install
+# Build all packages
+pnpm run build
 
-# 3. Set environment variables
-cp .env.example .env
-# Fill in: DATABASE_URL, PORT, BASE_PATH
+# Regenerate API hooks and Zod schemas from OpenAPI spec
+pnpm --filter @workspace/api-spec run codegen
 
-# 4. Push database schema
+# Push database schema changes (development)
 pnpm --filter @workspace/db run push
 
-# 5. Start the API server
-pnpm --filter @workspace/api-server run dev
-
-# 6. Start the frontend (in another terminal)
-cd apps/web && pnpm dev
+# Start development servers
+pnpm run dev
 ```
-
----
-
-## ⚠️ Gotchas
-
-- `PORT` and `BASE_PATH` env vars are **required** — both the API server and Vite will throw on startup if missing.
-- `DATABASE_URL` must be set before running DB commands or starting the API server.
-- **Never edit generated files** in `lib/api-client-react/src/generated/` or `lib/api-zod/src/generated/` — run `pnpm --filter @workspace/api-spec run codegen` instead.
-- Mockup files starting with `_` (e.g. `_helpers.tsx`) are ignored by the preview plugin — use this convention for shared utilities inside `src/components/mockups/`.
 
 ---
 
 ## 🤝 Contributing
 
-Pull requests are welcome! For major changes, please open an issue first to discuss what you'd like to change.
+We welcome contributions! Here's how you can help:
+
+1. **Fork** this repository
+2. **Create a feature branch** (`git checkout -b feature/amazing-feature`)
+3. **Make your changes** and test them
+4. **Commit** your changes (`git commit -m 'Add amazing feature'`)
+5. **Push** to your fork (`git push origin feature/amazing-feature`)
+6. **Open a Pull Request** describing your changes
+
+### Contribution Ideas
+- Add new Python lessons
+- Improve quiz questions
+- Fix bugs or improve performance
+- Add translations
+- Improve UI/UX
+- Write documentation
 
 ---
 
-⭐ Support
-If you found this project useful, consider giving it a ⭐ Star on GitHub.
-Your support motivates me to build more useful open-source projects.
+## 📝 Environment Variables
 
+Create a `.env` file in the root directory with:
 
-📄 License
-This project is licensed under the MIT License.
+```env
+# Database connection string
+DATABASE_URL=postgresql://user:password@localhost:5432/python_learner
+
+# API Server port
+PORT=5000
+
+# Vite base path (use "/" for root deployment)
+BASE_PATH=/
+```
+
+---
+
+## 🐛 Troubleshooting
+
+### Port already in use
+```bash
+# Use a different port
+PORT=5001 pnpm --filter @workspace/api-server run dev
+```
+
+### Database connection error
+- Verify `DATABASE_URL` is correct
+- Ensure PostgreSQL is running
+- Check database credentials
+
+### Dependencies installation fails
+```bash
+# Clear pnpm cache and reinstall
+pnpm store prune
+pnpm install
+```
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 👨‍💻 Author
+
+**Arshad Ansari**
+- GitHub: [@05unique-dotcom](https://github.com/05unique-dotcom)
+- Email: Contact via GitHub
+
+---
+
+## ⭐ Show Your Support
+
+If you found this project helpful, please:
+- ⭐ Give it a star on GitHub
+- 🍴 Fork it for your own learning
+- 💬 Share feedback and suggestions
+- 🤝 Contribute improvements
+
+Your support motivates me to build more educational and open-source projects! 🚀
+
+---
+
+## 🔗 Useful Links
+
+- [Python Official Documentation](https://docs.python.org/3/)
+- [React Documentation](https://react.dev)
+- [Tailwind CSS](https://tailwindcss.com)
+- [Drizzle ORM](https://orm.drizzle.team)
+
+---
+
+## 📞 Need Help?
+
+- 📖 Check the [Issues](https://github.com/05unique-dotcom/python-learner-app/issues) section
+- 💡 Create a [Discussion](https://github.com/05unique-dotcom/python-learner-app/discussions)
+- 🐛 Report a bug by opening an [Issue](https://github.com/05unique-dotcom/python-learner-app/issues/new)
+
+---
+
+**Happy Learning! 🎓**
