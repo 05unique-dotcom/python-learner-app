@@ -6,6 +6,8 @@
 [![GitHub forks](https://img.shields.io/github/forks/05unique-dotcom/python-learner-app?style=social)](https://github.com/05unique-dotcom/python-learner-app)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+**📂 GitHub Repository:** https://github.com/05unique-dotcom/python-learner-app
+
 ---
 
 ## ✨ Features
