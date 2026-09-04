@@ -6,7 +6,7 @@ Interactive Python learning platform with lessons, quizzes, badges, a certificat
 
 ## 🚀 Live Website
 
-**[Open Python Learner →](https://python-learner--05unique7057.replit.app)**
+**[Open Python Learner →](https://python-learner-app-python-learner-y-ten.vercel.app)**
 
 No installation needed — just click the link above and start learning Python directly in your browser.
 
