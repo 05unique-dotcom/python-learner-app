@@ -1,6 +1,6 @@
 # Python Learner
 
-[![Website](https://img.shields.io/website?url=https%3A%2F%2Fpython-learner--05unique7057.replit.app&up_message=online&down_message=offline&label=live%20site)](https://python-learner--05unique7057.replit.app)
+[![Website](https://img.shields.io/website?url=https%3A%2F%2Fpython-learner--05unique7057.replit.app&up_message=online&down_message=offline&label=live%20site)](https://python-learner-app-python-learner-y-ten.vercel.app)
 
 Interactive Python learning platform with lessons, quizzes, badges, a certificate of completion, streak tracking, a points & rewards system, and a real leaderboard.
 
