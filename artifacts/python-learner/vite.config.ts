@@ -22,7 +22,7 @@ const basePath = process.env.BASE_PATH;
 if (!basePath) {
   basePath = "/";
 }
-
+}
 export default defineConfig({
   base: basePath,
   plugins: [
