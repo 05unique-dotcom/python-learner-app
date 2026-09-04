@@ -23,6 +23,7 @@ if (!basePath) {
   basePath = "/";
 }
 }
+
 export default defineConfig({
   base: basePath,
   plugins: [
