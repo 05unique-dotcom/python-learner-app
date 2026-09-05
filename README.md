@@ -7,7 +7,7 @@ Learn Python through structured lessons, interactive quizzes, badges, streaks, r
 ## 🚀 Live Website
 
 
-(Python-learner-app_Live demo)[*https://python-learner--arshadansari786.replit.app/*]
+[Python-learner-app_Live demo](*https://python-learner--arshadansari786.replit.app/*)
 
 **No installation required.** Open the website and start learning Python directly in your browser.
 
